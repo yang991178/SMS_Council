@@ -1,0 +1,24 @@
+﻿@media (min-width:993px){
+    main {
+        padding-left: 300px;
+    }
+}
+body {
+    font-family: "Roboto",'Microsoft YaHei', sans-serif;
+}
+.side-nav{
+    padding-top:62px;
+}
+.side-nav a>svg {
+    vertical-align:middle;
+    margin-right:24px;
+}
+.bold>a {
+    font-weight:700
+}
+main {
+    padding-top:54px
+}
+html, body{
+    height:100%;
+}
