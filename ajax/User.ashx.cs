@@ -32,13 +32,10 @@ namespace SMS_Council.ajax
                 }
                 else if(context.Request["action"].ToString() == "listsequence")
                 {
-                    var dt = Helper.RetrieveDataTable(new SqlCommand("SELECT [id], [name] FROM [Users] WHERE [activated] = 1 AND [display] = 1 ORDER BY [id] ASC"));
-                    dt.Columns.AddRange(new DataColumn[]
-                    {
-                        new DataColumn("cls", typeof(int)),
-                        new DataColumn("unit", typeof(string)),
-                        new DataColumn("phone", typeof(string))
-                    });
+                    string sql = Classes.User.IsLogin && Classes.User.Current.Role == 0 ? "SELECT [id], [name], [class], [unit] FROM [Users] WHERE [activated] = 1 ORDER BY [id] ASC" : "SELECT [id], [name] FROM [Users] WHERE [activated] = 1 AND [display] = 1 ORDER BY [id] ASC";
+                    var dt = Helper.RetrieveDataTable(new SqlCommand(sql));
+                    if (Classes.User.IsLogin && Classes.User.Current.Role == 0)
+                        dt.Columns["class"].ColumnName = "cls";
                     context.Response.Write(Helper.DataTableToJson(dt));
                 }
                 else if (context.Request["action"].ToString() == "logout")

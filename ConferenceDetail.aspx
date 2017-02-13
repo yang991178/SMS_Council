@@ -99,6 +99,9 @@
             font-size:14px;
             overflow:hidden;
         }
+        .btn-floating {
+            text-align:center
+        }
         h5 {
             line-height:150%;
             font-size:1.55rem;
@@ -109,6 +112,10 @@
             top:0;
             border:1px solid #26a69a;
             padding:0 15px;
+            background-color:rgba(255,255,255,.5)
+        }
+        #refresh:hover {
+            background-color: rgba(212,212,212,.5);
         }
         #refresh-icon {
             margin:-4px 10px 0 0;
@@ -141,10 +148,13 @@
             margin:auto;
             top:115px;
             background:rgba(255,255,255,0.75);
-            padding:6px 0 26px;
+            padding:6px 10px 26px;
+            overflow-y:hidden;
+            overflow-x:auto;
         }
         .votedetail > h3 {            
             font-weight:300 !important;
+            white-space:nowrap;
         }
         .votedetail > h3 > span {
             position:relative;
@@ -164,6 +174,9 @@
         .votedetail > h3 > span.red-text:before {
             content:"反对";
         }
+        .votedetail > h3 > span.orange-text:before {
+            content:"弃权";
+        }
         .votedetail > h3 > span.grey-text:before {
             content:"未投";
         }
@@ -180,7 +193,7 @@
             background:#fafafa;
         }
         .fixed-action-btn.horizontal ul li {
-            margin:0 15px 0 0;
+            margin:10px 15px 10px 0;
         }
         .mobile-scroll {
             padding-left: 62.75px;

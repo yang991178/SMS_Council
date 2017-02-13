@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
     ) {  }
 
     ngOnInit(): void {
-        this.ConferenceService.listVotes(parseInt(this.location.path().replace(/^\/conference\//, "").replace(/\/vote\/\d$/, ""))).then(list => this.ConferenceService.setVoteList(list));
+        this.ConferenceService.listVotes(parseInt(this.location.path().replace(/^\/conference\//, "").replace(/\/vote\/[0-9]*$/, ""))).then(list => this.ConferenceService.setVoteList(list));
         this.UserService.listSequenceUsers().then(list => this.ConferenceService.setUserList(list))
     }
 }

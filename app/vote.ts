@@ -6,11 +6,15 @@ export class Vote {
     notvoted: number[];
     consented: number[];
     rejected: number[];
+    abstained: number[];
     nvvote: number;
     cvote: number;
     rvote: number;
+    avote: number;
     ratio: number;
     halfmajority: number;
     absmajority: number;
     active: boolean;
+    type: number;
+    passvote: number;
 }

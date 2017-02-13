@@ -22,3 +22,8 @@ main {
 html, body{
     height:100%;
 }
+nav .button-collapse {
+    height:35px !important;
+    margin-top:10.5px;
+    margin-bottom:10.5px;
+}

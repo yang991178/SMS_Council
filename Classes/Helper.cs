@@ -14,8 +14,8 @@ namespace SMS_Council.Classes
         public static string WriteMenu()
         {
             return @"    <nav style=""position:fixed;top:0;left:0;z-index:1000"">
-        <a style=""color:#808080;margin-left:0;margin-left:18.75px;margin-right:0"" href=""#"" data-activates=""nav-mobile"" id=""show-menu"" class=""button-collapse top-nav waves-effect waves-light circle""><svg width=""24px"" height=""56px"" viewBox=""0 0 48 48""><path d=""M6 36h36v-4H6v4zm0-10h36v-4H6v4zm0-14v4h36v-4H6z""></path></svg></a>
-        <a style=""color:#808080;margin-left:0;display:block;margin-left:18.75px"" data-activates=""nav-mobile"" class=""button-collapse top-nav waves-effect waves-light circle hide-on-med-and-down""><svg width=""24px"" height=""56px"" viewBox=""0 0 48 48""><path d=""M6 36h36v-4H6v4zm0-10h36v-4H6v4zm0-14v4h36v-4H6z""></path></svg></a>
+        <a style=""color:#808080;margin-left:0;margin-left:18.75px;margin-right:0"" href=""#"" data-activates=""nav-mobile"" id=""show-menu"" class=""button-collapse top-nav waves-effect waves-ripple waves-circle""><svg width=""24px"" height=""35px"" viewBox=""0 0 48 48""><path d=""M6 36h36v-4H6v4zm0-10h36v-4H6v4zm0-14v4h36v-4H6z""></path></svg></a>
+        <a style=""color:#808080;margin-left:0;display:block;margin-left:18.75px"" data-activates=""nav-mobile"" class=""button-collapse top-nav hide-on-med-and-down""><svg width=""24px"" height=""35px"" viewBox=""0 0 48 48""><path d=""M6 36h36v-4H6v4zm0-10h36v-4H6v4zm0-14v4h36v-4H6z""></path></svg></a>
         <div class=""nav-wrapper"">
             <div class=""left""><img src=""/img/logo.png"" /></div>
             <div class=""left"" style=""font-size:20px;font-weight:700"">议事会</div>
@@ -56,10 +56,10 @@ namespace SMS_Council.Classes
                         return @"<li class=""bold""><a href=""/conference/" + id + @"/vote/0"" class=""waves-effect waves-ripple""><svg width=""24px"" height=""24px"" viewBox=""0 0 48 48""><path d=""M14 38h20V8H14v30zM4 34h8V12H4v22zm32-22v22h8V12h-8z""></path></svg>表决<span class=""new badge"" data-badge-caption=""正在进行"" style=""font-size:10px""></span></a></li>";
                     }
                     else
-                        return @"<li class=""bold""><a><svg width=""24px"" height=""24px"" viewBox=""0 0 48 48""><path d=""M14 38h20V8H14v30zM4 34h8V12H4v22zm32 - 22v22h8V12h - 8z""></path></svg>表决<span class=""badge"" data-badge-caption=""无表决"" style=""font-size:10px""></span></a></li>";
+                        return @"<li class=""bold""><a><svg width=""24px"" height=""24px"" viewBox=""0 0 48 48""><path d=""M14 38h20V8H14v30zM4 34h8V12H4v22zm32-22v22h8V12h-8z""></path></svg>表决<span class=""badge"" data-badge-caption=""无表决"" style=""font-size:10px""></span></a></li>";
                 }
                 else
-                    return @"<li class=""bold""><a><svg width=""24px"" height=""24px"" viewBox=""0 0 48 48""><path d=""M14 38h20V8H14v30zM4 34h8V12H4v22zm32 - 22v22h8V12h - 8z""></path></svg>表决<span class=""badge"" data-badge-caption=""无表决"" style=""font-size:10px""></span></a></li>";
+                    return @"<li class=""bold""><a><svg width=""24px"" height=""24px"" viewBox=""0 0 48 48""><path d=""M14 38h20V8H14v30zM4 34h8V12H4v22zm32-22v22h8V12h-8z""></path></svg>表决<span class=""badge"" data-badge-caption=""无表决"" style=""font-size:10px""></span></a></li>";
             }
         }
 

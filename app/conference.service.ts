@@ -56,8 +56,8 @@ export class ConferenceService {
             .catch(this.handleError);
     }
 
-    saveVote(id: number, title: string): Promise<number> {
-        return this.http.post("/ajax/Conference.ashx?action=addvote", "id=" + id + "&title=" + encodeURIComponent(title), { headers: this.headers })
+    saveVote(id: number, title: string, type: number, passvote: string): Promise<number> {
+        return this.http.post("/ajax/Conference.ashx?action=addvote", "id=" + id + "&title=" + encodeURIComponent(title) + "&type=" + type + "&passvote=" + passvote, { headers: this.headers })
             .toPromise()
             .then(response => parseInt(response.text()) as number)
             .catch(this.handleError)

@@ -61,7 +61,7 @@ declare var $: any;
                         <thead><tr><th>标题</th><th>操作</th><th></th></tr></thead>
                         <tbody>
                             <tr *ngIf="votes.length == 0"><td>无表决</td><td></td><td></td></tr>
-                            <tr *ngFor="let vote of votes"><td>{{vote.title.substr(3)}}</td><td><a href="/conference/manage/vote/{{vote.id}}">管理</a></td><td><a (click)="deleteVote(vote.id)" href="javascript:void(0)" class="red-text">删除</a></td></tr>
+                            <tr *ngFor="let vote of votes"><td>{{vote.title}}</td><td><a href="/conference/manage/vote/{{vote.id}}">管理</a></td><td><a (click)="deleteVote(vote.id)" href="javascript:void(0)" class="red-text">删除</a></td></tr>
                         </tbody>
                     </table>
                     <div [hidden]="!newVote">
@@ -69,7 +69,11 @@ declare var $: any;
                             <input [(ngModel)]="vote" id="newvote" type="text" />
                             <label for="newvote">表决内容</label>
                         </div>
-                        <div>如更改了会议信息，请先保存会议再添加表决<button (click)="saveVote()" class="btn right">保存新表决</button></div>
+                        <div>如更改了会议信息，请先保存会议再添加表决
+                            <button (click)="saveVote()" class="btn right">保存新表决</button>
+                            <div class="input-field right" style="margin:-3px 5px 0"><select class="browser-default" [(ngModel)]="votetype"><option value="1" selected>可弃权</option><option value="2">不可弃权</option></select></div>
+                            <div class="input-field right" style="margin:-3px 5px 0"><select class="browser-default" [(ngModel)]="passvote"><option value="1" selected>半数通过</option><option value="2">三分之二通过</option><option value="3">自定义阈值</option></select></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -99,12 +103,16 @@ export class AppComponent implements OnInit, AfterViewInit {
     votes: Vote[];
 
     vote = "";
+    votetype = 1;
+    passvote = 1;
     newVote = false;
 
     constructor(private UserService: UserService, private ConferenceService: ConferenceService) { }
 
     addVote(): void{
         this.vote = "";
+        this.votetype = 1;
+        this.passvote = 1;
         this.newVote = true;
     }
 
@@ -116,7 +124,17 @@ export class AppComponent implements OnInit, AfterViewInit {
             alert("表决内容过长。");
         }
         else {
-            this.ConferenceService.saveVote(this.id, this.vote).then(flag => this.handleVoteFlag(flag));
+            var getp = () => {
+                var x = prompt("输入通过表决所需票数，当前会议票数为" + ($('#clsuser').val().length + $('#unituser').val().length * this.ratio) + "。（若修改过会议信息请先保存，否则该票数可能不准确）","0");
+                if (!/^[0-9]*$/.test(x)) {
+                    alert("阈值必须为纯数字。")
+                    return "err";
+                }
+                return x;
+            };
+            var p = this.passvote == 3 ? getp() : this.passvote.toString();
+            if (p == "err") return;
+            this.ConferenceService.saveVote(this.id, this.vote, this.votetype, p).then(flag => this.handleVoteFlag(flag));
             this.newVote = false;
         }
     }

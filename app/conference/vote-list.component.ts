@@ -18,15 +18,16 @@ import { ConferenceService } from '../conference.service.js';
                 <div *ngFor="let vote of votelist; let i = index" class="votecard">
                     <div class="card">
                         <div class="progress">
-                            <div class="determinate" [style.width]="(vote.cvote / (vote.cvote + vote.rvote + vote.nvvote) * 100) + '%'"></div>
-                            <div class="determinate red" [style.width]="(vote.rvote  / (vote.cvote + vote.rvote + vote.nvvote) *100) + '%'"></div>
-                            <div class="determinate grey" [style.width]="((1 - vote.cvote  / (vote.cvote + vote.rvote + vote.nvvote) - vote.rvote  / (vote.cvote + vote.rvote + vote.nvvote))*100) + '%'"></div>
+                            <div class="determinate" [style.width]="(vote.cvote / (vote.cvote + vote.rvote + vote.avote + vote.nvvote) * 100) + '%'"></div>
+                            <div class="determinate red" [style.width]="(vote.rvote  / (vote.cvote + vote.rvote + vote.avote + vote.nvvote) *100) + '%'"></div>
+                            <div class="determinate orange" [style.width]="(vote.avote  / (vote.cvote + vote.rvote + vote.avote + vote.nvvote) *100) + '%'"></div>
+                            <div class="determinate grey" [style.width]="((1 - vote.avote  / (vote.cvote + vote.rvote + vote.avote + vote.nvvote) - vote.cvote  / (vote.cvote + vote.avote + vote.rvote + vote.nvvote) - vote.rvote  / (vote.cvote + vote.avote + vote.rvote + vote.nvvote))*100) + '%'"></div>
                         </div>
                         <div class="card-content">
                             <h5>{{vote.title}}</h5>
                         </div>
                         <div class="card-action">
-                            {{vote.cvote < vote.halfmajority ? "未通过" : (vote.cvote < vote.absmajority ? "已通过" : "多数通过")}} · <a [routerLink]="['./vote', i]" class="teal-text">{{vote.active ? "进入表决" : "查看详情"}}</a>
+                            {{vote.cvote < vote.passvote ? "未通过" : "已通过"}} · <a [routerLink]="['./vote', i]" class="teal-text">{{vote.active ? "进入表决" : "查看详情"}}</a>
                         </div>
                     </div>
                     <p class="time">{{vote.time}}</p>
@@ -48,7 +49,7 @@ export class VoteListComponent implements OnDestroy {
 
     reload(): void {
         this.reloading = true;
-        this.ConferenceService.listVotes(parseInt(this.location.path().replace(/^\/conference\//, "").replace(/\/vote\/\d$/, ""))).then(list => this.ConferenceService.setVoteList(list));
+        this.ConferenceService.listVotes(parseInt(this.location.path().replace(/^\/conference\//, "").replace(/\/vote\/[0-9]*$/, ""))).then(list => this.ConferenceService.setVoteList(list));
     }
 
     ngOnDestroy(): void {
