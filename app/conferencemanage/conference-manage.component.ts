@@ -2,17 +2,19 @@
 
 import { User } from '../user.js';
 import { Vote } from '../vote.js';
+import { Delegation } from '../delegation.js';
 import { Conference } from '../conference.js';
 import { UserService } from '../user.service.js';
 import { ConferenceService } from '../conference.service.js';
 
 declare var $: any;
+declare var parseInt: any;
 
 @Component({
     selector: 'conference-manage',
     template: `<div class="container">
             <table class="bordered">
-                <thead><tr><th>id</th><th>会议名称</th><th>状态</th><th><a [hidden]="!(cReady && uReady)" (click)="initModal(null)" href="javascript:void(0)" class="teal-text">添加</a></th></tr></thead>
+                <thead><tr><th>id</th><th>会议名称</th><th>状态</th><th><a [hidden]="!(cReady && uReady && u2Ready)" (click)="initModal(null)" href="javascript:void(0)" class="teal-text">添加</a></th></tr></thead>
                 <tbody>
                     <tr *ngFor="let conference of conferences"><td>{{conference.id}}</td><td>{{conference.name}}</td><td>{{conference.state == 1 ? "进行中" : "已结束"}}</td><td><a href="javascript:void(0)" (click)="initModal(conference)">修改</a></td></tr>
                 </tbody>
@@ -55,7 +57,25 @@ declare var $: any;
                       </div>
                     </div>
                 </div>
-                <div *ngIf="votes">
+                <div *ngIf="votes && delegations">
+                    <h5 class="teal-text">委托管理<button [disabled]="newDelegation" (click)="addDelegation()" class="btn btn-flat teal-text waves-effect waves-ripple right" style="font-size:16px;border: 1px solid #009688;">添加</button></h5>
+                    <table class="bordered">
+                        <thead><tr><th>议委</th><th>目标</th><th>操作</th></tr></thead>
+                        <tbody *ngIf="delegations.length > 0">
+                            <tr *ngFor="let delegation of delegations"><td>{{getNameList([delegation.subject])}}</td><td>{{getNameList(delegation.object)}}</td><td><a (click)="deleteDelegation(delegation.id)" href="javascript:void(0)" class="red-text">删除</a></td></tr>
+                        </tbody>
+                        <tbody *ngIf="delegations.length == 0">
+                            <tr><td>无委托</td><td></td><td></td></tr>
+                        </tbody>
+                    </table>
+                    <div [hidden]="!newDelegation" style="margin-top:10px">
+                        <div class="row">
+                            <div class="input-field col s12 m6"><select id="subject" [(ngModel)]="subject"><option value="0" selected disabled>选择议委</option><option *ngFor="let user of unitUser" value="{{user.id}}">{{user.name+"（"+user.unit+"单元）"}}</option></select><label>议委</label></div>
+                            <div class="input-field col s12 m6"><select id="object" multiple><option value="" selected disabled>选择目标</option><option *ngFor="let user of unitUser" value="{{user.id}}">{{user.name+"（"+user.unit+"单元）"}}</option></select><label>目标</label></div>
+                        </div>
+                        <button (click)="saveDelegation()" class="btn right" style="margin:-10px 0 10px">保存新委托</button>
+                    </div>
+                    <div style="clear:both"></div>
                     <h5 class="teal-text">表决管理<button [disabled]="newVote" (click)="addVote()" class="btn btn-flat teal-text waves-effect waves-ripple right" style="font-size:16px;border: 1px solid #009688;">添加</button></h5>
                     <table class="bordered">
                         <thead><tr><th>标题</th><th>操作</th><th></th></tr></thead>
@@ -92,8 +112,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     conferences: Conference[];
     clsUser: User[];
     unitUser: User[];
+    sUser: User[]; //Serialized Users
+    sUserId: number[];
     cReady = false;
     uReady = false;
+    u2Ready = false;
     editAction = true;
 
     id: number;
@@ -107,7 +130,71 @@ export class AppComponent implements OnInit, AfterViewInit {
     passvote = 1;
     newVote = false;
 
+    delegations: Delegation[];
+    subject: number;
+    newDelegation = false;
+
     constructor(private UserService: UserService, private ConferenceService: ConferenceService) { }
+
+    setIdList(): void {
+        var list = new Array<number>();
+        for (let user of this.sUser) {
+            list.push(user.id);
+        }
+        this.sUserId = list;
+    }
+
+    binarySearch(srcArray: number[], des: number): number {
+        var low = 0;
+        var high = srcArray.length - 1;
+        while (low <= high) {
+            var middle = parseInt((low + high) / 2);
+            if (des == srcArray[middle]) {
+                return middle;
+            }
+            else if (des < srcArray[middle]) {
+                high = middle - 1;
+            }
+            else {
+                low = middle + 1;
+            }
+        }
+        return -1;
+    }
+
+    getNameList(search: number[]): string {
+        var list = new Array<string>();
+        for (let id of search) {
+            var result = this.binarySearch(this.sUserId, id);
+            if (result != -1)
+                list.push(this.sUser[result].name + "（" + this.sUser[result].unit + "单元）");
+        }
+        var r = list.join("，");
+        return r == "" ? "名单为空" : r;
+    }
+
+    addDelegation(): void {
+        $('select').material_select();
+        this.subject = 0;
+        this.newDelegation = true;
+    }
+
+    saveDelegation(): void {
+        if ($('#subject').val() == "")
+            alert(this.subject);
+        else if ($('#object').val() == "")
+            alert("请选择目标议委")
+        else {
+            this.ConferenceService.saveDelegation(this.id, $('#subject').val(), $('#object').val().toString()).then(flag => this.handleModificationFlag(flag, "delegation"));
+            this.newDelegation = false;
+        }
+    }
+
+    deleteDelegation(id: number): void {
+        if (confirm("确定要删除该委托吗？")) {
+            this.ConferenceService.deleteDelegation(id).then(flag => this.handleModificationFlag(flag, "delegation"));
+        }
+    }
 
     addVote(): void{
         this.vote = "";
@@ -134,14 +221,14 @@ export class AppComponent implements OnInit, AfterViewInit {
             };
             var p = this.passvote == 3 ? getp() : this.passvote.toString();
             if (p == "err") return;
-            this.ConferenceService.saveVote(this.id, this.vote, this.votetype, p).then(flag => this.handleVoteFlag(flag));
+            this.ConferenceService.saveVote(this.id, this.vote, this.votetype, p).then(flag => this.handleModificationFlag(flag, "vote"));
             this.newVote = false;
         }
     }
 
     deleteVote(id: number): void {
         if (confirm("确定要删除该表决吗？")) {
-            this.ConferenceService.deleteVote(id).then(flag => this.handleVoteFlag(flag));
+            this.ConferenceService.deleteVote(id).then(flag => this.handleModificationFlag(flag, "vote"));
         }
     }
 
@@ -166,10 +253,13 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
     }
 
-    handleVoteFlag(flag: number): void {
+    handleModificationFlag(flag: number, type: string): void {
         switch (flag) {
             case 1:
-                this.ConferenceService.listVotes(this.id).then(list => this.votes = list);
+                if (type == "vote")
+                    this.ConferenceService.listVotes(this.id).then(list => this.votes = list);
+                else if (type == "delegation")
+                    this.ConferenceService.listDelegations(this.id).then(list => this.delegations = list);
                 break;
             case -1:
                 alert("登录已过期，请重新登录");
@@ -219,7 +309,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     initModal(c: Conference): void {
-        if (this.cReady && this.uReady) {
+        if (this.cReady && this.uReady && this.u2Ready) {
             if (c) {
                 this.updateSelectList(this.cElement, c.cparticipants);
                 this.updateSelectList(this.uElement, c.uparticipants);
@@ -228,7 +318,10 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.ratio = c.ratio;
                 this.state = c.state == 1;
                 this.editAction = false;
+                this.votes = null;
+                this.delegations = null;
                 this.ConferenceService.listVotes(c.id).then(list => this.votes = list);
+                this.ConferenceService.listDelegations(c.id).then(list => this.delegations = list);
             }
             else {
                 if (!(this.editAction)) {
@@ -238,17 +331,19 @@ export class AppComponent implements OnInit, AfterViewInit {
                     this.ratio = null;
                     this.state = true;
                     this.votes = null;
+                    this.delegations = null;
                 }
                 this.editAction = true;
             }
             this.newVote = false;
+            this.newDelegation = false;
             $('select').material_select();
             $('#modal').modal('open')
         }
     }
 
     updateSelectList(element: HTMLSelectElement, selected: number[]) {
-        let options = element.options;
+        let options: any = element.options;
         for (let i = 0; i < options.length; i++) {
             options[i].selected = selected.indexOf(parseInt(options[i].value)) > -1;
         }
@@ -263,6 +358,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit(): void {
+        this.UserService.listSequenceUsers().then(list => { this.sUser = list; this.setIdList(); this.u2Ready = true; });
         this.ConferenceService.listConferences().then(list => { this.conferences = list; this.cReady = true });
         this.UserService.listUsers().then(lists => { this.clsUser = lists[0]; this.unitUser = lists[1]; this.uReady = true; })
     }

@@ -17,6 +17,7 @@
         conferencep: 'app/conference',
         conferencemanage: 'app/conferencemanage',
         votemanage: 'app/votemanage',
+        adminusermanage: 'app/adminusermanage',
 
       // angular bundles
       '@angular/core': 'npm:@angular/core/bundles/core.umd.js',
@@ -59,6 +60,10 @@
       },
       votemanage: {
           main: './vote-manage.js',
+          defaultExtension: 'js'
+      },
+      adminusermanage: {
+          main: './admin-user-manage.js',
           defaultExtension: 'js'
       }
     }

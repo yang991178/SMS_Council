@@ -2,6 +2,9 @@
 using System.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Security.Cryptography;
+using System.Text;
+using System;
 
 namespace SMS_Council.Classes
 {
@@ -27,7 +30,7 @@ namespace SMS_Council.Classes
             <li><div class=""divider""></div></li>
             <li class=""bold""><a href=""/conference"" class=""waves-effect waves-ripple""><svg width=""24px"" height=""24px"" viewBox=""0 0 48 48"" class=""doawgc""><path d=""M43.98 8c0-2.21-1.77-4-3.98-4H8C5.79 4 4 5.79 4 8v24c0 2.21 1.79 4 4 4h28l8 8-.02-36zM36 28H12v-4h24v4zm0-6H12v-4h24v4zm0-6H12v-4h24v4z""></path></svg>会议</a></li>
             " + LatestVote +@"                        <li><div class=""divider""></div></li>
-            <li class=""bold""><a href=""/contacts"" class=""waves-effect waves-ripple""><svg width=""24px"" height=""24px"" viewBox=""0 0 48 48""><path d=""M24 24c4.42 0 8-3.59 8-8 0-4.42-3.58-8-8-8s-8 3.58-8 8c0 4.41 3.58 8 8 8zm0 4c-5.33 0-16 2.67-16 8v4h32v-4c0-5.33-10.67-8-16-8z""></path></svg>议委</a></li>" + (User.IsLogin && User.Current.Role == 0 ? @"<li><div class=""divider""></div></li><li class=""bold""><a href=""/conference/manage"" class=""waves-effect waves-ripple""><svg width=""24px"" height=""24px"" viewBox=""0 0 24 24""><path d=""M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z""></path></svg>会议管理</a></li>" : "") + @"        
+            <li class=""bold""><a href=""/contacts"" class=""waves-effect waves-ripple""><svg width=""24px"" height=""24px"" viewBox=""0 0 48 48""><path d=""M24 24c4.42 0 8-3.59 8-8 0-4.42-3.58-8-8-8s-8 3.58-8 8c0 4.41 3.58 8 8 8zm0 4c-5.33 0-16 2.67-16 8v4h32v-4c0-5.33-10.67-8-16-8z""></path></svg>议委</a></li>" + (User.IsLogin && User.Current.Role == 0 ? @"<li><div class=""divider""></div></li><li class=""bold""><a href=""/conference/manage"" class=""waves-effect waves-ripple""><svg width=""24px"" height=""24px"" viewBox=""0 0 24 24""><path d=""M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z""></path></svg>会议管理</a></li><li class=""bold""><a href=""/user-manage"" class=""waves-effect waves-ripple""><svg width=""24px"" height=""24px"" viewBox=""0 0 24 24""><path d=""M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z""></path></svg>用户管理</a></li>" : "") + @"        
     <li style=""position:absolute;bottom:40px;left:0;width: 100%;background:rgba(51,51,51,0.08)""><p style=""margin:0 30px 20px;font-size:12px"">在GPL-3.0协议下<a target=""_blank"" href=""https://github.com/yang991178/SMS_Council"" style=""display:inline;   padding:0;font-size:12px;text-decoration: underline"">开放源代码</a>.</p></li></ul></header>";
         }
 
@@ -72,9 +75,34 @@ namespace SMS_Council.Classes
             return (dt);
         }
 
+        public static string EncryptPassword(string raw)
+        {
+            string password = "";
+            MD5 md5 = MD5.Create();
+            byte[] s = md5.ComputeHash(Encoding.UTF8.GetBytes(raw));
+            for (int i = 0; i < s.Length; i++)
+            {
+                password = password + s[i].ToString("x2");
+            }
+            return password;
+        }
+
         public static string DataTableToJson(DataTable dt)
         {
             return JsonConvert.SerializeObject(dt, new DataTableConverter());
+        }
+
+        public static string GetRnd(int length)
+        {
+            byte[] b = new byte[4];
+            new RNGCryptoServiceProvider().GetBytes(b);
+            Random r = new Random(BitConverter.ToInt32(b, 0));
+            string s = null, str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            for (int i = 0; i < length; i++)
+            {
+                s += str.Substring(r.Next(0, str.Length - 1), 1);
+            }
+            return s;
         }
     }
 }
