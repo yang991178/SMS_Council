@@ -145,6 +145,182 @@ namespace SMS_Council.Classes
                 return -1;
         }
 
+        public static int Vote(int id, int uid, string decision, bool delegation)
+        {
+            SqlCommand cmd = new SqlCommand("SELECT [notvoted], [consented], [rejected], [abstained], [nvvote], [cvote], [rvote], [avote], [ratio], [active], [conference] FROM [Votes] WHERE [id]=@id");
+            cmd.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = id });
+            DataTable dt = Helper.RetrieveDataTable(cmd);
+            var r = dt.Rows[0];
+            List<int> notvoted = r["notvoted"].ToString() == "" ? new List<int>() : r["notvoted"].ToString().Split(',').Select(int.Parse).ToList();
+            var role = Current.Role;
+            if (role == 0 || delegation)
+            {
+                cmd = new SqlCommand("SELECT [role] FROM [Users] WHERE [id]=@id");
+                cmd.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = uid });
+                role = Convert.ToInt32(Helper.RetrieveDataTable(cmd).Rows[0][0].ToString());
+            }
+            if (r["active"].ToString() == "True" && notvoted.Contains(uid))
+            {
+                SqlConnection conn = Helper.Conn;
+                var conference = Convert.ToInt32(r["conference"].ToString());
+                if (decision == "C")
+                {
+                    List<int> consented = r["consented"].ToString() == "" ? new List<int>() : r["consented"].ToString().Split(',').Select(int.Parse).ToList();
+                    consented.Add(uid);
+                    notvoted.Remove(uid);
+                    int vote = role == 2 ? Convert.ToInt32(r["ratio"].ToString()) : 1;
+                    int nvvote = Convert.ToInt32(r["nvvote"].ToString()) - vote;
+                    int cvote = Convert.ToInt32(r["cvote"].ToString()) + vote;
+                    cmd = new SqlCommand("UPDATE [Votes] SET [notvoted]=@notvoted, [consented]=@consented, [nvvote]=@nvvote, [cvote]=@cvote WHERE [id]=@id", conn);
+                    cmd.Parameters.AddRange(new SqlParameter[] {
+                                new SqlParameter("@notvoted", SqlDbType.VarChar){ Value = string.Join(",",notvoted.Select(x => x.ToString()).ToArray()) },
+                                new SqlParameter("@consented", SqlDbType.VarChar){ Value = string.Join(",",consented.Select(x => x.ToString()).ToArray()) },
+                                new SqlParameter("@nvvote", SqlDbType.SmallInt){ Value = nvvote },
+                                new SqlParameter("@cvote", SqlDbType.SmallInt){ Value = cvote },
+                                new SqlParameter("@id", SqlDbType.Int) { Value = id }
+                            });
+                    conn.Open();
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        if (role == 2 && !delegation)
+                        {
+                            conn.Close();
+                            cmd = new SqlCommand("SELECT [object] FROM [Delegations] WHERE [subject]=@uid AND [conference]=@id");
+                            cmd.Parameters.AddRange(new SqlParameter[] {
+                                new SqlParameter("@id", SqlDbType.Int) { Value = conference },
+                                new SqlParameter("@uid", SqlDbType.Int) { Value = uid }
+                            });
+                            dt = Helper.RetrieveDataTable(cmd);
+                            foreach (DataRow row in dt.Rows)
+                            {
+                                int[] obj = row[0].ToString().Split(',').Select(int.Parse).ToArray();
+                                foreach (int duid in obj)
+                                {
+                                    Vote(id, duid, decision, true);
+                                }
+                            }
+                        }
+                        return 1;
+                    }
+                    catch
+                    {
+                        return -10;
+                    }
+                    finally
+                    {
+                        conn.Close();
+                    }
+                }
+                else if (decision == "R")
+                {
+                    List<int> rejected = r["rejected"].ToString() == "" ? new List<int>() : r["rejected"].ToString().Split(',').Select(int.Parse).ToList();
+                    rejected.Add(uid);
+                    notvoted.Remove(uid);
+                    int vote = role == 2 ? Convert.ToInt32(r["ratio"].ToString()) : 1;
+                    int nvvote = Convert.ToInt32(r["nvvote"].ToString()) - vote;
+                    int rvote = Convert.ToInt32(r["rvote"].ToString()) + vote;
+                    cmd = new SqlCommand("UPDATE [Votes] SET [notvoted]=@notvoted, [rejected]=@rejected, [nvvote]=@nvvote, [rvote]=@rvote WHERE [id]=@id", conn);
+                    cmd.Parameters.AddRange(new SqlParameter[] {
+                                new SqlParameter("@notvoted", SqlDbType.VarChar){ Value = string.Join(",",notvoted.Select(x => x.ToString()).ToArray()) },
+                                new SqlParameter("@rejected", SqlDbType.VarChar){ Value = string.Join(",",rejected.Select(x => x.ToString()).ToArray()) },
+                                new SqlParameter("@nvvote", SqlDbType.SmallInt){ Value = nvvote },
+                                new SqlParameter("@rvote", SqlDbType.SmallInt){ Value = rvote },
+                                new SqlParameter("@id", SqlDbType.Int) { Value = id }
+                            });
+                    conn.Open();
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        if (role == 2 && !delegation)
+                        {
+                            conn.Close();
+                            cmd = new SqlCommand("SELECT [object] FROM [Delegations] WHERE [subject]=@uid AND [conference]=@id");
+                            cmd.Parameters.AddRange(new SqlParameter[] {
+                                new SqlParameter("@id", SqlDbType.Int) { Value = conference },
+                                new SqlParameter("@uid", SqlDbType.Int) { Value = uid }
+                            });
+                            dt = Helper.RetrieveDataTable(cmd);
+                            foreach (DataRow row in dt.Rows)
+                            {
+                                int[] obj = row[0].ToString().Split(',').Select(int.Parse).ToArray();
+                                foreach (int duid in obj)
+                                {
+                                    Vote(id, duid, decision, true);
+                                }
+                            }
+                        }
+                        return 1;
+                    }
+                    catch
+                    {
+                        return -10;
+                    }
+                    finally
+                    {
+                        conn.Close();
+                    }
+                }
+                else if (decision == "A")
+                {
+                    List<int> abstained = r["abstained"].ToString() == "" ? new List<int>() : r["abstained"].ToString().Split(',').Select(int.Parse).ToList();
+                    abstained.Add(uid);
+                    notvoted.Remove(uid);
+                    int vote = role == 2 ? Convert.ToInt32(r["ratio"].ToString()) : 1;
+                    int nvvote = Convert.ToInt32(r["nvvote"].ToString()) - vote;
+                    int avote = Convert.ToInt32(r["avote"].ToString()) + vote;
+                    cmd = new SqlCommand("UPDATE [Votes] SET [notvoted]=@notvoted, [abstained]=@abstained, [nvvote]=@nvvote, [avote]=@avote WHERE [id]=@id", conn);
+                    cmd.Parameters.AddRange(new SqlParameter[] {
+                                new SqlParameter("@notvoted", SqlDbType.VarChar){ Value = string.Join(",",notvoted.Select(x => x.ToString()).ToArray()) },
+                                new SqlParameter("@abstained", SqlDbType.VarChar){ Value = string.Join(",",abstained.Select(x => x.ToString()).ToArray()) },
+                                new SqlParameter("@nvvote", SqlDbType.SmallInt){ Value = nvvote },
+                                new SqlParameter("@avote", SqlDbType.SmallInt){ Value = avote },
+                                new SqlParameter("@id", SqlDbType.Int) { Value = id }
+                            });
+                    conn.Open();
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        if (role == 2 && !delegation)
+                        {
+                            conn.Close();
+                            cmd = new SqlCommand("SELECT [object] FROM [Delegations] WHERE [subject]=@uid AND [conference]=@id");
+                            cmd.Parameters.AddRange(new SqlParameter[] {
+                                new SqlParameter("@id", SqlDbType.Int) { Value = conference },
+                                new SqlParameter("@uid", SqlDbType.Int) { Value = uid }
+                            });
+                            dt = Helper.RetrieveDataTable(cmd);
+                            foreach (DataRow row in dt.Rows)
+                            {
+                                int[] obj = row[0].ToString().Split(',').Select(int.Parse).ToArray();
+                                foreach (int duid in obj)
+                                {
+                                    Vote(id, duid, decision, true);
+                                }
+                            }
+                        }
+                        return 1;
+                    }
+                    catch
+                    {
+                        return -10;
+                    }
+                    finally
+                    {
+                        conn.Close();
+                    }
+                }
+                else
+                {
+                    return -2;
+                }
+            }
+            else
+            {
+                return -2;
+            }
+        }
+
         private static string MD5Encrypt(string str)
         {
             string result = "";

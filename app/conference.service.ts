@@ -6,6 +6,7 @@ import 'rxjs/add/operator/toPromise';
 
 import { User } from './user';
 import { Vote } from './vote';
+import { Delegation } from './delegation';
 import { Conference } from './conference';
 
 @Injectable()
@@ -103,6 +104,27 @@ export class ConferenceService {
             .toPromise()
             .then(response => parseInt(response.text()) as number)
             .catch(this.handleError);
+    }
+
+    listDelegations(conference: number): Promise<Delegation[]> {
+        return this.http.get("/ajax/Conference.ashx?action=listdelegations&conference=" + conference)
+            .toPromise()
+            .then(response => response.json() as Delegation[])
+            .catch(this.handleError)
+    }
+
+    saveDelegation(conference: number, subject: string, object: string): Promise<number> {
+        return this.http.post("/ajax/Conference.ashx?action=savedelegation", "conference=" + conference + "&subject=" + subject + "&object=" + object, { headers: this.headers })
+            .toPromise()
+            .then(response => parseInt(response.text()) as number)
+            .catch(this.handleError)
+    }
+
+    deleteDelegation(id: number): Promise<number> {
+        return this.http.post("/ajax/Conference.ashx?action=deletedelegation", "id=" + id, { headers: this.headers })
+            .toPromise()
+            .then(response => parseInt(response.text()) as number)
+            .catch(this.handleError)
     }
 
     private headers = new Headers({ 'Content-Type': 'application/x-www-form-urlencoded' });
